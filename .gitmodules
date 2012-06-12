@@ -1,0 +1,15 @@
+[submodule "Widgets"]
+	path = Widgets
+	url = https://github.com/daviddoria/Widgets.git
+[submodule "ITKVTKCamera"]
+	path = ITKVTKCamera
+	url = https://github.com/daviddoria/ITKVTKCamera.git
+[submodule "Layer"]
+	path = Layer
+	url = https://github.com/daviddoria/Layer.git
+[submodule "ITKVTKHelpers"]
+	path = ITKVTKHelpers
+	url = https://github.com/daviddoria/ITKVTKHelpers.git
+[submodule "EigenHelpers"]
+	path = EigenHelpers
+	url = https://github.com/daviddoria/EigenHelpers.git

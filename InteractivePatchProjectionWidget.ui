@@ -1,0 +1,252 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>InteractivePatchProjectionWidget</class>
+ <widget class="QMainWindow" name="InteractivePatchProjectionWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1083</width>
+    <height>841</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Interactive Patch Projection</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,4">
+    <item>
+     <widget class="QWidget" name="LeftPanelWidget" native="true">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="toolTip">
+            <string>Patch half width (radius)</string>
+           </property>
+           <property name="text">
+            <string>Patch Radius</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="txtPatchRadius">
+           <property name="toolTip">
+            <string>Sets the width/height of a square patch</string>
+           </property>
+           <property name="text">
+            <string>15</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#008000;&quot;&gt;Original Patch&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGraphicsView" name="graphicsView"/>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_3">
+         <property name="text">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Projected Patch&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGraphicsView" name="graphicsView_2"/>
+       </item>
+       <item>
+        <widget class="LabeledSlider" name="labeledSliderPlugin">
+         <property name="toolTip">
+          <string>Labeled slider</string>
+         </property>
+         <property name="whatsThis">
+          <string>The LabeledSlider widget takes the responsibility of diplaying the current value in the label.</string>
+         </property>
+         <property name="name">
+          <string>Number of Dimensions</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QVTKWidget" name="qvtkWidget"/>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1083</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuLeft_Pane">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="actionOpenImage"/>
+    <addaction name="actionOpenMask"/>
+    <addaction name="actionOpenMaskInverted"/>
+    <addaction name="actionFlipImage"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+   </widget>
+   <widget class="QMenu" name="menuExport">
+    <property name="title">
+     <string>Export</string>
+    </property>
+    <addaction name="actionScreenshot"/>
+    <addaction name="action_SavePatches"/>
+   </widget>
+   <widget class="QMenu" name="menuView">
+    <property name="title">
+     <string>View</string>
+    </property>
+    <addaction name="action_View_TopPatches"/>
+   </widget>
+   <addaction name="menuLeft_Pane"/>
+   <addaction name="menuHelp"/>
+   <addaction name="menuExport"/>
+   <addaction name="menuView"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>TopToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionOpenImage">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionSavePointsLeft">
+   <property name="text">
+    <string>Save Points</string>
+   </property>
+  </action>
+  <action name="actionSavePointsRight">
+   <property name="text">
+    <string>Save Points</string>
+   </property>
+  </action>
+  <action name="actionOpenImageRight">
+   <property name="text">
+    <string>Open Image</string>
+   </property>
+  </action>
+  <action name="actionLoadPointsLeft">
+   <property name="text">
+    <string>Load Points</string>
+   </property>
+  </action>
+  <action name="actionLoadPointsRight">
+   <property name="text">
+    <string>Load Points</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+  <action name="actionOpenPointCloudLeft">
+   <property name="text">
+    <string>Open PointCloud</string>
+   </property>
+  </action>
+  <action name="actionOpenPointCloudRight">
+   <property name="text">
+    <string>Open PointCloud</string>
+   </property>
+  </action>
+  <action name="actionFlipImage">
+   <property name="text">
+    <string>Flip Image</string>
+   </property>
+  </action>
+  <action name="actionFlipRightImage">
+   <property name="text">
+    <string>Flip Right Image</string>
+   </property>
+  </action>
+  <action name="actionSaveResult">
+   <property name="text">
+    <string>Save Result</string>
+   </property>
+  </action>
+  <action name="actionOpenMask">
+   <property name="text">
+    <string>Open Mask</string>
+   </property>
+  </action>
+  <action name="actionOpenMaskInverted">
+   <property name="text">
+    <string>Open Mask Inverted</string>
+   </property>
+  </action>
+  <action name="actionScreenshot">
+   <property name="text">
+    <string>Screenshot</string>
+   </property>
+  </action>
+  <action name="action_View_TopPatches">
+   <property name="text">
+    <string>Top Patches</string>
+   </property>
+  </action>
+  <action name="action_SavePatches">
+   <property name="text">
+    <string>Save Patches</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>LabeledSlider</class>
+   <extends>QWidget</extends>
+   <header>LabeledSlider.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QVTKWidget</class>
+   <extends>QWidget</extends>
+   <header>QVTKWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
