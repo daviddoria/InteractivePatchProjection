@@ -61,7 +61,7 @@
 // Submodules
 #include "ITKVTKHelpers/ITKVTKHelpers.h"
 #include "ITKVTKHelpers/ITKHelpers/Helpers/Helpers.h"
-#include "EigenHelpers/EigenHelpers.h"
+#include "PatchProjection/EigenHelpers/EigenHelpers.h"
 
 void InteractivePatchProjectionWidget::on_actionHelp_activated()
 {
@@ -69,9 +69,8 @@ void InteractivePatchProjectionWidget::on_actionHelp_activated()
 
   help->setReadOnly(true);
   help->append("<h1>Interactive Patch Comparison</h1>\
-  Position the two patches. <br/>\
-  Their difference will be displayed.<br/>\
-  Additionally you can display the top patches of the target patch.<p/>");
+  Click on the image. The patch centered around the clicked pixel is projected<br/>\
+  using the basis computed from the image patches.<p/>");
   help->show();
 }
 
