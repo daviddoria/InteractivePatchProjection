@@ -10,9 +10,6 @@
 [submodule "ITKVTKHelpers"]
 	path = ITKVTKHelpers
 	url = https://github.com/daviddoria/ITKVTKHelpers.git
-[submodule "EigenHelpers"]
-	path = EigenHelpers
-	url = https://github.com/daviddoria/EigenHelpers.git
 [submodule "PatchProjection"]
 	path = PatchProjection
 	url = https://github.com/daviddoria/PatchProjection.git

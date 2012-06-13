@@ -13,7 +13,6 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE) #fix the dynamic linking error (RPAT
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
 # Submodules
-add_subdirectory(EigenHelpers)
 # add_subdirectory(VTKHelpers)
 add_subdirectory(ITKVTKHelpers)
 # add_subdirectory(ITKQtHelpers)
