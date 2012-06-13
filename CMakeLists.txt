@@ -19,7 +19,7 @@ add_subdirectory(ITKVTKHelpers)
 # add_subdirectory(ITKQtHelpers)
 add_subdirectory(ITKVTKCamera)
 add_subdirectory(Layer)
-# add_subdirectory(PatchClustering)
+add_subdirectory(PatchProjection)
 
 add_subdirectory(Widgets)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/Widgets ${CMAKE_CURRENT_BINARY_DIR}/Widgets)
