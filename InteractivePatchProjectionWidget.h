@@ -21,6 +21,9 @@
 
 #include "ui_InteractivePatchProjectionWidget.h"
 
+// Eigen
+#include <Eigen/Dense>
+
 // VTK
 #include <vtkSmartPointer.h>
 
@@ -97,6 +100,8 @@ private:
 
   itk::Size<2> PatchSize;
 
+  /** The projection matrix to project patches to a lower dimensional space */
+  Eigen::MatrixXf ProjectionMatrix;
 };
 
 #endif // InteractivePatchProjectionWidget_H

@@ -62,6 +62,7 @@
 #include "ITKVTKHelpers/ITKVTKHelpers.h"
 #include "ITKVTKHelpers/ITKHelpers/Helpers/Helpers.h"
 #include "PatchProjection/EigenHelpers/EigenHelpers.h"
+#include "PatchProjection/PatchProjection.h"
 
 void InteractivePatchProjectionWidget::on_actionHelp_activated()
 {
@@ -161,6 +162,12 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   this->statusBar()->showMessage("Opened image.");
 
   this->ImageLayer.ImageSlice->VisibilityOn();
+
+  std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
+  this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix(this->Image.GetPointer(), GetPatchRadius());
+
+  this->sldDimensions->setMinimum(1);
+  this->sldDimensions->setMaximum(this->ProjectionMatrix.rows());
 }
 
 void InteractivePatchProjectionWidget::on_actionOpenImage_activated()

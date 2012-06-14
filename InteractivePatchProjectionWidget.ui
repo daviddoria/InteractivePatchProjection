@@ -69,7 +69,7 @@
         <widget class="QGraphicsView" name="graphicsView_2"/>
        </item>
        <item>
-        <widget class="LabeledSlider" name="labeledSliderPlugin">
+        <widget class="LabeledSlider" name="sldDimensions">
          <property name="toolTip">
           <string>Labeled slider</string>
          </property>

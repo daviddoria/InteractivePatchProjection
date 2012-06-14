@@ -43,7 +43,8 @@ Interactive.cpp
 ${InteractivePatchProjectionWidgetUISrcs} ${InteractivePatchProjectionWidgetMOCSrcs})
 
 TARGET_LINK_LIBRARIES(InteractivePatchProjection
-#EigenHelpers QtHelpers VTKHelpers
+EigenHelpers
+#QtHelpers VTKHelpers
 Helpers
 ITKHelpers
 ITKVTKHelpers
