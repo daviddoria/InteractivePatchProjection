@@ -44,6 +44,11 @@ int main( int argc, char** argv )
   else
   {
     std::cerr << "Input arguments invalid!" << std::endl;
+    for(int i = 1; i < argc; ++i)
+    {
+      std::cerr << argv[i] << " ";
+    }
+    std::cerr << std::endl;
     return EXIT_FAILURE;
   }
 

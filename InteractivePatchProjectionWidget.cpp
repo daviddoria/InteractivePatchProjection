@@ -36,12 +36,13 @@
 // VTK
 #include <vtkActor.h>
 #include <vtkCamera.h>
+#include <vtkEventQtSlotConnect.h>
 #include <vtkFloatArray.h>
 #include <vtkImageData.h>
 #include <vtkImageProperty.h>
 #include <vtkImageSlice.h>
 #include <vtkImageSliceMapper.h>
-#include <vtkInteractorStyleImage.h>
+//#include <vtkInteractorStyleImage.h>
 #include <vtkLookupTable.h>
 #include <vtkMath.h>
 #include <vtkPointData.h>
@@ -63,6 +64,7 @@
 #include "ITKVTKHelpers/ITKHelpers/Helpers/Helpers.h"
 #include "PatchProjection/EigenHelpers/EigenHelpers.h"
 #include "PatchProjection/PatchProjection.h"
+#include "vtkPointSelectionStyle/PointSelectionStyle2D.h"
 
 void InteractivePatchProjectionWidget::on_actionHelp_activated()
 {
@@ -99,27 +101,38 @@ void InteractivePatchProjectionWidget::SharedConstructor()
   actionOpenMask->setIcon(openIcon);
   this->toolBar->addAction(actionOpenMask);
   actionOpenMask->setEnabled(false);
-/*
-  actionSaveResult->setIcon(saveIcon);
-  this->toolBar->addAction(actionSaveResult);*/
-
-  this->InteractorStyle = vtkSmartPointer<vtkInteractorStyleImage>::New();
 
   // Setup the image display objects
-  this->ImageLayer.ImageSlice->PickableOff();
   this->ImageLayer.ImageSlice->VisibilityOff(); // There are errors if this is visible and therefore displayed before it has data ("This data object does not contain the requested extent.")
 
   // Add objects to the renderer
   this->Renderer = vtkSmartPointer<vtkRenderer>::New();
+  std::cout << "Renderer: " << this->Renderer << std::endl;
+
   this->qvtkWidget->GetRenderWindow()->AddRenderer(this->Renderer);
+
+  this->InteractorStyle = vtkSmartPointer<PointSelectionStyle2D>::New();
+  this->InteractorStyle->SetCurrentRenderer(this->Renderer);
+  //this->InteractorStyle->SetDefaultRenderer(this->Renderer);
+  this->InteractorStyle->SetInteractor(this->qvtkWidget->GetRenderWindow()->GetInteractor());
 
   this->Renderer->AddViewProp(this->ImageLayer.ImageSlice);
 
-  this->InteractorStyle->SetCurrentRenderer(this->Renderer);
   this->qvtkWidget->GetRenderWindow()->GetInteractor()->SetInteractorStyle(this->InteractorStyle);
 
   this->Image = ImageType::New();
 
+  this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
+  this->Connections->Connect(this->InteractorStyle,
+                             this->InteractorStyle->ClickedPointEvent,
+                             this,
+                             SLOT(slot_clicked(vtkObject*, unsigned long, void*, void*)));
+}
+
+void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data)
+{
+  double* point = reinterpret_cast<double*>(call_data);
+  std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
 }
 
 InteractivePatchProjectionWidget::InteractivePatchProjectionWidget(QWidget* parent) : QMainWindow(parent)
@@ -164,7 +177,9 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   this->ImageLayer.ImageSlice->VisibilityOn();
 
   std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
-  this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix(this->Image.GetPointer(), GetPatchRadius());
+  // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
+  // Known to work with radius=7, known to not work with radius=15
+  //this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix(this->Image.GetPointer(), GetPatchRadius());
 
   this->sldDimensions->setMinimum(1);
   this->sldDimensions->setMaximum(this->ProjectionMatrix.rows());

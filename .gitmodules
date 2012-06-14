@@ -13,3 +13,6 @@
 [submodule "PatchProjection"]
 	path = PatchProjection
 	url = https://github.com/daviddoria/PatchProjection.git
+[submodule "vtkPointSelectionStyle"]
+	path = vtkPointSelectionStyle
+	url = https://github.com/daviddoria/vtkPointSelectionStyle.git

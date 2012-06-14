@@ -27,10 +27,12 @@
 // VTK
 #include <vtkSmartPointer.h>
 
+class vtkEventQtSlotConnect;
 class vtkImageData;
 class vtkImageSlice;
 class vtkImageSliceMapper;
-class vtkInteractorStyleImage;
+
+class PointSelectionStyle2D;
 
 // ITK
 #include "itkImage.h"
@@ -72,6 +74,8 @@ public slots:
 
   void RefreshSlot();
 
+  void slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data);
+
 private:
 
   void UpdatePatches();
@@ -85,7 +89,8 @@ private:
   void GetPatchSize();
 
   // Allow us to interact with the objects as we would like.
-  vtkSmartPointer<vtkInteractorStyleImage> InteractorStyle;
+  //vtkSmartPointer<vtkInteractorStyleImage> InteractorStyle;
+  vtkSmartPointer<PointSelectionStyle2D> InteractorStyle;
 
   // Display the image appropriately
   ITKVTKCamera itkvtkCamera;
@@ -102,6 +107,8 @@ private:
 
   /** The projection matrix to project patches to a lower dimensional space */
   Eigen::MatrixXf ProjectionMatrix;
+
+  vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 };
 
 #endif // InteractivePatchProjectionWidget_H

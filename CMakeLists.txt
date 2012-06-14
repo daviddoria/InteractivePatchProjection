@@ -19,6 +19,7 @@ add_subdirectory(ITKVTKHelpers)
 add_subdirectory(ITKVTKCamera)
 add_subdirectory(Layer)
 add_subdirectory(PatchProjection)
+add_subdirectory(vtkPointSelectionStyle)
 
 add_subdirectory(Widgets)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/Widgets ${CMAKE_CURRENT_BINARY_DIR}/Widgets)
@@ -52,5 +53,6 @@ ITKVTKCamera
 #PatchClustering
 Layer
 libCustomWidgets
+PointSelectionStyle
 ${VTK_LIBRARIES} ${ITK_LIBRARIES} ${QT_LIBRARIES})
 INSTALL( TARGETS InteractivePatchProjection RUNTIME DESTINATION ${INSTALL_DIR} )
