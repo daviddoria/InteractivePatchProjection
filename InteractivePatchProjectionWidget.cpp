@@ -30,6 +30,7 @@
 
 // Qt
 #include <QFileDialog>
+#include <QGraphicsPixmapItem>
 #include <QIcon>
 #include <QTextEdit>
 
@@ -42,7 +43,6 @@
 #include <vtkImageProperty.h>
 #include <vtkImageSlice.h>
 #include <vtkImageSliceMapper.h>
-//#include <vtkInteractorStyleImage.h>
 #include <vtkLookupTable.h>
 #include <vtkMath.h>
 #include <vtkPointData.h>
@@ -135,16 +135,17 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data)
 {
   double* point = reinterpret_cast<double*>(call_data);
-  std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
+  //std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
 
   itk::Index<2> index = {{static_cast<int>(point[0]), static_cast<int>(point[1])}};
   itk::ImageRegion<2> region = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
 
   QImage originalPatchImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), region);
 
-  this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchImage));
+  QGraphicsPixmapItem* originalPatchItem = this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchImage));
   this->gfxOriginalPatch->setScene(this->OriginalPatchScene);
 
+  this->gfxOriginalPatch->fitInView(originalPatchItem);
 //   Eigen::VectorXf vectorized = EigenHelpers::VectorizePatch(this->Image.GetPointer(), region);
 //
 //   Eigen::VectorXf projectedVector =
