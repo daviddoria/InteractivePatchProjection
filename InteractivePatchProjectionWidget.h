@@ -110,9 +110,14 @@ private:
   /** The projection matrix to project patches to a lower dimensional space */
   Eigen::MatrixXf ProjectionMatrix;
 
+  Eigen::VectorXf MeanVector;
+
+  Eigen::VectorXf StandardDeviationVector;
+
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 
   QGraphicsScene* OriginalPatchScene;
+  QGraphicsScene* ProjectedPatchScene;
 };
 
 #endif // InteractivePatchProjectionWidget_H

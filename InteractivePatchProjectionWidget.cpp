@@ -92,6 +92,7 @@ void InteractivePatchProjectionWidget::SharedConstructor()
   this->setupUi(this);
 
   this->OriginalPatchScene = new QGraphicsScene;
+  this->ProjectedPatchScene = new QGraphicsScene;
 
   // Setup icons
   QIcon openIcon = QIcon::fromTheme("document-open");
@@ -134,33 +135,59 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 
 void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data)
 {
+  // We expect this slot to be called with 'call_data' containing the location of the picked point in image coordinates.
+
+  // Get the picked region
   double* point = reinterpret_cast<double*>(call_data);
   //std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
 
   itk::Index<2> index = {{static_cast<int>(point[0]), static_cast<int>(point[1])}};
   itk::ImageRegion<2> region = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
 
-  QImage originalPatchImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), region);
+  // Display the original patch
+  QImage originalPatchQImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), region);
 
-  QGraphicsPixmapItem* originalPatchItem = this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchImage));
+  QGraphicsPixmapItem* originalPatchItem = this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchQImage));
   this->gfxOriginalPatch->setScene(this->OriginalPatchScene);
 
   this->gfxOriginalPatch->fitInView(originalPatchItem);
-//   Eigen::VectorXf vectorized = EigenHelpers::VectorizePatch(this->Image.GetPointer(), region);
-//
-//   Eigen::VectorXf projectedVector =
-//           EigenHelpers::DimensionalityReduction(vectorized, this->ProjectionMatrix, this->sldDimensions->value());
-//
-//   ImageType::Pointer projectedPatchImage = ImageType::New();
-//   PatchProjection::UnvectorizePatch(unvectorized, projectedPatchImage.GetPointer(), this->Image->GetNumberOfComponentsPerPixel());
 
+  // Compute the projected patch
+  Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(), region);
 
+  unsigned int numberOfDimensionsToProjectTo = this->sldDimensions->value();
+
+  Eigen::VectorXf projectedVector =
+          EigenHelpers::DimensionalityReduction(vectorized, this->ProjectionMatrix, numberOfDimensionsToProjectTo);
+
+  // Even though the DimensionalityReduction function does this truncation internally, we need it here to use in the
+  // inverse projection
+  Eigen::MatrixXf truncatedProjectionMatrix = EigenHelpers::TruncateColumns(this->ProjectionMatrix, numberOfDimensionsToProjectTo);
+
+  Eigen::MatrixXf inverseProjectionMatrix = EigenHelpers::PseudoInverse(truncatedProjectionMatrix);
+
+  Eigen::VectorXf unprojectedVector = inverseProjectionMatrix * projectedVector;
+
+  // Apply the inverse normalization transform
+  unprojectedVector = this->StandardDeviationVector.matrix().asDiagonal() * unprojectedVector;
+  unprojectedVector += this->MeanVector;
+
+  ImageType::Pointer projectedPatchImage = ImageType::New();
+  PatchProjection::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(), this->Image->GetNumberOfComponentsPerPixel());
+
+  // Display the projected patch
+  QImage projectedPatchQImage = ITKQtHelpers::GetQImageColor(projectedPatchImage.GetPointer(), projectedPatchImage->GetLargestPossibleRegion());
+
+  QGraphicsPixmapItem* projectedPatchItem = this->ProjectedPatchScene->addPixmap(QPixmap::fromImage(projectedPatchQImage));
+  this->gfxProjectedPatch->setScene(this->ProjectedPatchScene);
+
+  this->gfxProjectedPatch->fitInView(projectedPatchItem);
 }
 
 InteractivePatchProjectionWidget::InteractivePatchProjectionWidget(QWidget* parent) : QMainWindow(parent)
 {
   SharedConstructor();
-};
+}
 
 void InteractivePatchProjectionWidget::on_actionQuit_activated()
 {
@@ -202,6 +229,7 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
   // Known to work with radius=7, known to not work with radius=15
   //this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix(this->Image.GetPointer(), GetPatchRadius());
+  this->ProjectionMatrix = PatchProjection::GetDummyProjectionMatrix(this->Image.GetPointer(), GetPatchRadius());
 
   this->sldDimensions->setMinimum(1);
   this->sldDimensions->setMaximum(this->ProjectionMatrix.rows());
