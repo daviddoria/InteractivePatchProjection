@@ -65,6 +65,7 @@
 #include "PatchProjection/EigenHelpers/EigenHelpers.h"
 #include "PatchProjection/PatchProjection.h"
 #include "vtkPointSelectionStyle/PointSelectionStyle2D.h"
+#include "ITKQtHelpers/ITKQtHelpers.h"
 
 void InteractivePatchProjectionWidget::on_actionHelp_activated()
 {
@@ -89,6 +90,8 @@ InteractivePatchProjectionWidget::InteractivePatchProjectionWidget(const std::st
 void InteractivePatchProjectionWidget::SharedConstructor()
 {
   this->setupUi(this);
+
+  this->OriginalPatchScene = new QGraphicsScene;
 
   // Setup icons
   QIcon openIcon = QIcon::fromTheme("document-open");
@@ -133,6 +136,24 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
 {
   double* point = reinterpret_cast<double*>(call_data);
   std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
+
+  itk::Index<2> index = {{static_cast<int>(point[0]), static_cast<int>(point[1])}};
+  itk::ImageRegion<2> region = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
+
+  QImage originalPatchImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), region);
+
+  this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchImage));
+  this->gfxOriginalPatch->setScene(this->OriginalPatchScene);
+
+//   Eigen::VectorXf vectorized = EigenHelpers::VectorizePatch(this->Image.GetPointer(), region);
+//
+//   Eigen::VectorXf projectedVector =
+//           EigenHelpers::DimensionalityReduction(vectorized, this->ProjectionMatrix, this->sldDimensions->value());
+//
+//   ImageType::Pointer projectedPatchImage = ImageType::New();
+//   PatchProjection::UnvectorizePatch(unvectorized, projectedPatchImage.GetPointer(), this->Image->GetNumberOfComponentsPerPixel());
+
+
 }
 
 InteractivePatchProjectionWidget::InteractivePatchProjectionWidget(QWidget* parent) : QMainWindow(parent)

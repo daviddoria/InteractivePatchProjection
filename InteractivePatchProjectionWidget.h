@@ -32,6 +32,7 @@ class vtkImageData;
 class vtkImageSlice;
 class vtkImageSliceMapper;
 
+// Custom
 class PointSelectionStyle2D;
 
 // ITK
@@ -40,6 +41,7 @@ class PointSelectionStyle2D;
 
 // Qt
 #include <QMainWindow>
+class QGraphicsScene;
 
 // Submodules
 #include "ITKVTKCamera/ITKVTKCamera.h"
@@ -109,6 +111,8 @@ private:
   Eigen::MatrixXf ProjectionMatrix;
 
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;
+
+  QGraphicsScene* OriginalPatchScene;
 };
 
 #endif // InteractivePatchProjectionWidget_H

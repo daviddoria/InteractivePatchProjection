@@ -15,7 +15,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 # Submodules
 # add_subdirectory(VTKHelpers)
 add_subdirectory(ITKVTKHelpers)
-# add_subdirectory(ITKQtHelpers)
+add_subdirectory(ITKQtHelpers)
 add_subdirectory(ITKVTKCamera)
 add_subdirectory(Layer)
 add_subdirectory(PatchProjection)

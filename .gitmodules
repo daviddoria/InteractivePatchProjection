@@ -16,3 +16,6 @@
 [submodule "vtkPointSelectionStyle"]
 	path = vtkPointSelectionStyle
 	url = https://github.com/daviddoria/vtkPointSelectionStyle.git
+[submodule "ITKQtHelpers"]
+	path = ITKQtHelpers
+	url = https://github.com/daviddoria/ITKQtHelpers.git

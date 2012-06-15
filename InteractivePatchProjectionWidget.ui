@@ -56,7 +56,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGraphicsView" name="graphicsView"/>
+        <widget class="QGraphicsView" name="gfxOriginalPatch"/>
        </item>
        <item>
         <widget class="QLabel" name="label_3">
@@ -66,7 +66,7 @@
         </widget>
        </item>
        <item>
-        <widget class="QGraphicsView" name="graphicsView_2"/>
+        <widget class="QGraphicsView" name="gfxProjectedPatch"/>
        </item>
        <item>
         <widget class="LabeledSlider" name="sldDimensions">
