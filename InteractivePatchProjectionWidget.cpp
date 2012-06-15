@@ -111,7 +111,6 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 
   // Add objects to the renderer
   this->Renderer = vtkSmartPointer<vtkRenderer>::New();
-  std::cout << "Renderer: " << this->Renderer << std::endl;
 
   this->qvtkWidget->GetRenderWindow()->AddRenderer(this->Renderer);
 
@@ -133,19 +132,10 @@ void InteractivePatchProjectionWidget::SharedConstructor()
                              SLOT(slot_clicked(vtkObject*, unsigned long, void*, void*)));
 }
 
-void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data)
+void InteractivePatchProjectionWidget::DisplayPatches()
 {
-  // We expect this slot to be called with 'call_data' containing the location of the picked point in image coordinates.
-
-  // Get the picked region
-  double* point = reinterpret_cast<double*>(call_data);
-  //std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
-
-  itk::Index<2> index = {{static_cast<int>(point[0]), static_cast<int>(point[1])}};
-  itk::ImageRegion<2> region = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
-
   // Display the original patch
-  QImage originalPatchQImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), region);
+  QImage originalPatchQImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), this->SelectedRegion);
 
   QGraphicsPixmapItem* originalPatchItem = this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchQImage));
   this->gfxOriginalPatch->setScene(this->OriginalPatchScene);
@@ -153,7 +143,7 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
   this->gfxOriginalPatch->fitInView(originalPatchItem);
 
   // Compute the projected patch
-  Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(), region);
+  Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(), this->SelectedRegion);
 
   unsigned int numberOfDimensionsToProjectTo = this->sldDimensions->value();
 
@@ -163,11 +153,11 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
   // Even though the DimensionalityReduction function does this truncation internally, we need it here to use in the
   // inverse projection
   Eigen::MatrixXf truncatedProjectionMatrix = EigenHelpers::TruncateColumns(this->ProjectionMatrix, numberOfDimensionsToProjectTo);
-  std::cout << "truncatedProjectionMatrix size: " << truncatedProjectionMatrix.rows() << " x " << truncatedProjectionMatrix.cols() << std::endl;
+  //std::cout << "truncatedProjectionMatrix size: " << truncatedProjectionMatrix.rows() << " x " << truncatedProjectionMatrix.cols() << std::endl;
   //std::cout << truncatedProjectionMatrix << std::endl;
 
   Eigen::MatrixXf inverseProjectionMatrix = EigenHelpers::PseudoInverse(truncatedProjectionMatrix);
-  std::cout << "inverseProjectionMatrix size: " << inverseProjectionMatrix.rows() << " x " << inverseProjectionMatrix.cols() << std::endl;
+  //std::cout << "inverseProjectionMatrix size: " << inverseProjectionMatrix.rows() << " x " << inverseProjectionMatrix.cols() << std::endl;
   //std::cout << inverseProjectionMatrix << std::endl;
 
   Eigen::VectorXf unprojectedVector = inverseProjectionMatrix.transpose() * projectedVector;
@@ -186,6 +176,26 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
   this->gfxProjectedPatch->setScene(this->ProjectedPatchScene);
 
   this->gfxProjectedPatch->fitInView(projectedPatchItem);
+}
+
+void InteractivePatchProjectionWidget::on_sldDimensions_valueChanged(int)
+{
+  std::cout << "Slider moved." << std::endl;
+  DisplayPatches();
+}
+
+void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data)
+{
+  // We expect this slot to be called with 'call_data' containing the location of the picked point in image coordinates.
+
+  // Get the picked region
+  double* point = reinterpret_cast<double*>(call_data);
+  //std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
+
+  itk::Index<2> index = {{static_cast<int>(point[0]), static_cast<int>(point[1])}};
+  this->SelectedRegion = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
+
+  DisplayPatches();
 }
 
 InteractivePatchProjectionWidget::InteractivePatchProjectionWidget(QWidget* parent) : QMainWindow(parent)

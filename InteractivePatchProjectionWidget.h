@@ -61,63 +61,79 @@ public:
 
   void Refresh();
 
-signals:
-  void signal_TargetPatchMoved(const itk::ImageRegion<2>&);
-  void signal_SourcePatchMoved(const itk::ImageRegion<2>&);
-
 public slots:
 
   void on_actionOpenImage_activated();
 
   void on_actionHelp_activated();
+
   void on_actionQuit_activated();
 
   void on_txtPatchRadius_returnPressed();
 
   void RefreshSlot();
 
+  /** This slot is called when the image is clicked. */
   void slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data);
+
+  /** This slot is called when the slider is moved. */
+  void on_sldDimensions_valueChanged(int);
 
 private:
 
-  void UpdatePatches();
+  /** Display the patches. */
+  void DisplayPatches();
 
+  /** Get the radius of the patches being used. */
   unsigned int GetPatchRadius();
 
+  /** This function is called when the widget is displayed on the screen. */
   void showEvent(QShowEvent* event);
 
+  /** Open an image. */
   void OpenImage(const std::string& filename);
 
+  /** Get the size of the patches being used from the GUI. */
   void GetPatchSize();
 
-  // Allow us to interact with the objects as we would like.
-  //vtkSmartPointer<vtkInteractorStyleImage> InteractorStyle;
+  /** This style invokes an event when the image is clicked that contains the point that was clicked in the call_data. */
   vtkSmartPointer<PointSelectionStyle2D> InteractorStyle;
 
-  // Display the image appropriately
+  /** Allows us to change the camera orientation to display the image appropriately */
   ITKVTKCamera itkvtkCamera;
 
+  /** The renderer */
   vtkSmartPointer<vtkRenderer> Renderer;
 
-  // Image display
+  /** Image display */
   Layer ImageLayer;
 
-  // The data that the user loads
+  /** The data that the user loads */
   ImageType::Pointer Image;
 
+  /** The size of the patches to use */
   itk::Size<2> PatchSize;
 
   /** The projection matrix to project patches to a lower dimensional space */
   Eigen::MatrixXf ProjectionMatrix;
 
+  /** The mean of each component of the vectorized image patches */
   Eigen::VectorXf MeanVector;
 
+  /** The standard deviation of each component of the vectorized image patches */
   Eigen::VectorXf StandardDeviationVector;
 
+  /** An object to allow us to connect Qt events to VTK callbacks */
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;
 
+  /** The scene for the original patch */
   QGraphicsScene* OriginalPatchScene;
+
+  /** The scene for the projected patch */
   QGraphicsScene* ProjectedPatchScene;
+
+  /** The region that has been selected */
+  itk::ImageRegion<2> SelectedRegion;
 };
 
 #endif // InteractivePatchProjectionWidget_H
