@@ -163,10 +163,14 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
   // Even though the DimensionalityReduction function does this truncation internally, we need it here to use in the
   // inverse projection
   Eigen::MatrixXf truncatedProjectionMatrix = EigenHelpers::TruncateColumns(this->ProjectionMatrix, numberOfDimensionsToProjectTo);
+  std::cout << "truncatedProjectionMatrix size: " << truncatedProjectionMatrix.rows() << " x " << truncatedProjectionMatrix.cols() << std::endl;
+  //std::cout << truncatedProjectionMatrix << std::endl;
 
   Eigen::MatrixXf inverseProjectionMatrix = EigenHelpers::PseudoInverse(truncatedProjectionMatrix);
+  std::cout << "inverseProjectionMatrix size: " << inverseProjectionMatrix.rows() << " x " << inverseProjectionMatrix.cols() << std::endl;
+  //std::cout << inverseProjectionMatrix << std::endl;
 
-  Eigen::VectorXf unprojectedVector = inverseProjectionMatrix * projectedVector;
+  Eigen::VectorXf unprojectedVector = inverseProjectionMatrix.transpose() * projectedVector;
 
   // Apply the inverse normalization transform
   unprojectedVector = this->StandardDeviationVector.matrix().asDiagonal() * unprojectedVector;
@@ -228,8 +232,10 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
   // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
   // Known to work with radius=7, known to not work with radius=15
-  //this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix(this->Image.GetPointer(), GetPatchRadius());
-  this->ProjectionMatrix = PatchProjection::GetDummyProjectionMatrix(this->Image.GetPointer(), GetPatchRadius());
+//   this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix(this->Image.GetPointer(), GetPatchRadius(),
+//                                                                     this->MeanVector, this->StandardDeviationVector);
+  this->ProjectionMatrix = PatchProjection::GetDummyProjectionMatrix(this->Image.GetPointer(), GetPatchRadius(),
+                                                                     this->MeanVector, this->StandardDeviationVector);
 
   this->sldDimensions->setMinimum(1);
   this->sldDimensions->setMaximum(this->ProjectionMatrix.rows());
