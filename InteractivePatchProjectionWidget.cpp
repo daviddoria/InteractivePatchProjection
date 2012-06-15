@@ -201,16 +201,17 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
 
   itk::Index<2> index = {{static_cast<int>(point[0]), static_cast<int>(point[1])}};
 
+  this->SelectedRegion = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
+
   // We can't process a patch that is not fully inside the image.
-  if(index[0] < (this->GetPatchRadius() + 1) ||
-    index[0] > (this->Image->GetLargestPossibleRegion().GetSize()[0] - (this->GetPatchRadius() + 1)) ||
-    index[1] < (this->GetPatchRadius() + 1) ||
-    index[1] > (this->Image->GetLargestPossibleRegion().GetSize()[1] - (this->GetPatchRadius() + 1)))
+  if(!this->Image->GetLargestPossibleRegion().IsInside(this->SelectedRegion))
   {
+    itk::Index<2> zeroIndex = {{0,0}};
+    itk::Size<2> zeroSize = {{0,0}};
+    this->SelectedRegion.SetIndex(zeroIndex);
+    this->SelectedRegion.SetSize(zeroSize);
     return;
   }
-
-  this->SelectedRegion = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
 
   DisplayPatches();
 }
