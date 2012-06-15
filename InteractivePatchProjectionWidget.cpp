@@ -178,9 +178,16 @@ void InteractivePatchProjectionWidget::DisplayPatches()
   this->gfxProjectedPatch->fitInView(projectedPatchItem);
 }
 
-void InteractivePatchProjectionWidget::on_sldDimensions_valueChanged(int)
+void InteractivePatchProjectionWidget::on_sldDimensions_sliderReleased()
 {
-  std::cout << "Slider moved." << std::endl;
+  // std::cout << "Slider moved." << std::endl;
+
+  // If the image has not been clicked yet, we can't do the computation.
+  if(this->SelectedRegion.GetSize()[0] == 0)
+  {
+    return;
+  }
+
   DisplayPatches();
 }
 
@@ -193,6 +200,16 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
   //std::cout << "Picked: " << point[0] << " " << point[1] << " " << point[2] << std::endl;
 
   itk::Index<2> index = {{static_cast<int>(point[0]), static_cast<int>(point[1])}};
+
+  // We can't process a patch that is not fully inside the image.
+  if(index[0] < (this->GetPatchRadius() + 1) ||
+    index[0] > (this->Image->GetLargestPossibleRegion().GetSize()[0] - (this->GetPatchRadius() + 1)) ||
+    index[1] < (this->GetPatchRadius() + 1) ||
+    index[1] > (this->Image->GetLargestPossibleRegion().GetSize()[1] - (this->GetPatchRadius() + 1)))
+  {
+    return;
+  }
+
   this->SelectedRegion = ITKHelpers::GetRegionInRadiusAroundPixel(index, GetPatchRadius());
 
   DisplayPatches();

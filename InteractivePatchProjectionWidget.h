@@ -77,7 +77,7 @@ public slots:
   void slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data);
 
   /** This slot is called when the slider is moved. */
-  void on_sldDimensions_valueChanged(int);
+  void on_sldDimensions_sliderReleased();
 
 private:
 
