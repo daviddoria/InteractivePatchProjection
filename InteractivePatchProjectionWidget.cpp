@@ -144,29 +144,26 @@ void InteractivePatchProjectionWidget::DisplayPatches()
 
   // Compute the projected patch
   Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(), this->SelectedRegion);
-  std::cout << "vectorized: " << vectorized << std::endl;
+  vectorized -= this->MeanVector; // Subtract the mean
+
+  EigenHelpers::OutputHorizontal("vectorized", vectorized);
 
   unsigned int numberOfDimensionsToProjectTo = this->sldDimensions->value();
+  //std::cout << "numberOfDimensionsToProjectTo: " << numberOfDimensionsToProjectTo << std::endl;
 
   Eigen::MatrixXf truncatedProjectionMatrix = EigenHelpers::TruncateColumns(this->ProjectionMatrix, numberOfDimensionsToProjectTo);
+  Eigen::VectorXf projectedVector = truncatedProjectionMatrix.transpose() * vectorized; // This is a change of basis, hence the transpose
 
-  Eigen::VectorXf projectedVector = truncatedProjectionMatrix.transpose() * vectorized;
-  std::cout << "projectedVector: " << projectedVector << std::endl;
+//  EigenHelpers::OutputHorizontal("projectedVector", projectedVector);
 
-  //std::cout << "truncatedProjectionMatrix size: " << truncatedProjectionMatrix.rows() << " x " << truncatedProjectionMatrix.cols() << std::endl;
-  //std::cout << truncatedProjectionMatrix << std::endl;
-
-  // This line is the bottleneck.
-  Eigen::MatrixXf inverseProjectionMatrix = EigenHelpers::PseudoInverse(truncatedProjectionMatrix);
-  //std::cout << "inverseProjectionMatrix size: " << inverseProjectionMatrix.rows() << " x " << inverseProjectionMatrix.cols() << std::endl;
-  //std::cout << inverseProjectionMatrix << std::endl;
-
-  Eigen::VectorXf unprojectedVector = inverseProjectionMatrix.transpose() * projectedVector;
-  std::cout << "unprojectedVector: " << unprojectedVector << std::endl;
+  // This is "undoing" the transformation
+  Eigen::VectorXf unprojectedVector = truncatedProjectionMatrix * projectedVector;
 
   // Apply the inverse normalization transform
-  unprojectedVector = this->StandardDeviationVector.matrix().asDiagonal() * unprojectedVector; // Multiply by the standard devation
+
   unprojectedVector += this->MeanVector; // Add the mean
+
+  EigenHelpers::OutputHorizontal("unprojectedVector", unprojectedVector);
 
   ImageType::Pointer projectedPatchImage = ImageType::New();
   PatchProjection::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(), this->Image->GetNumberOfComponentsPerPixel());
@@ -182,6 +179,22 @@ void InteractivePatchProjectionWidget::DisplayPatches()
 
 void InteractivePatchProjectionWidget::on_sldDimensions_sliderReleased()
 {
+  // If the image has not been clicked yet, we can't do the computation.
+  if(this->SelectedRegion.GetSize()[0] == 0)
+  {
+    return;
+  }
+
+  DisplayPatches();
+}
+
+void InteractivePatchProjectionWidget::on_sldDimensions_valueChanged(int value)
+{
+  // We don't want to handle every value as the slider is being moved with the mouse, only where it ends up.
+  if(this->sldDimensions->horizontalSlider->isSliderDown())
+  {
+    return;
+  }
   // std::cout << "Slider moved." << std::endl;
 
   // If the image has not been clicked yet, we can't do the computation.
@@ -262,14 +275,11 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
   // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
   // Known to work with radius=7, known to not work with radius=15
-  this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix(this->Image.GetPointer(), GetPatchRadius(),
-                                                                    this->MeanVector, this->StandardDeviationVector);
+  this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(), GetPatchRadius(),
+                                                                    this->MeanVector);
 
-//   this->ProjectionMatrix = PatchProjection::GetDummyProjectionMatrix(this->Image.GetPointer(), GetPatchRadius(),
-//                                                                      this->MeanVector, this->StandardDeviationVector);
+  //std::cout << "Mean: " << this->MeanVector << std::endl;
 
-  std::cout << "Mean: " << this->MeanVector << std::endl;
-  std::cout << "Standard deviation: " << this->StandardDeviationVector << std::endl;
   std::cout << "Projection matrix is " << this->ProjectionMatrix.rows() << " x " << this->ProjectionMatrix.cols() << std::endl;
 
   this->sldDimensions->setMinimum(1);

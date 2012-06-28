@@ -76,8 +76,11 @@ public slots:
   /** This slot is called when the image is clicked. */
   void slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data);
 
-  /** This slot is called when the slider is moved. */
+  /** This slot is called when the slider is released with the mouse. */
   void on_sldDimensions_sliderReleased();
+
+  /** This slot is called when the slider is moved using the arrow keys. */
+  void on_sldDimensions_valueChanged(int value);
 
 private:
 
@@ -119,9 +122,6 @@ private:
 
   /** The mean of each component of the vectorized image patches */
   Eigen::VectorXf MeanVector;
-
-  /** The standard deviation of each component of the vectorized image patches */
-  Eigen::VectorXf StandardDeviationVector;
 
   /** An object to allow us to connect Qt events to VTK callbacks */
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;
