@@ -146,7 +146,7 @@ void InteractivePatchProjectionWidget::DisplayPatches()
   Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(), this->SelectedRegion);
   vectorized -= this->MeanVector; // Subtract the mean
 
-  EigenHelpers::OutputHorizontal("vectorized", vectorized);
+  //EigenHelpers::OutputHorizontal("vectorized", vectorized);
 
   unsigned int numberOfDimensionsToProjectTo = this->sldDimensions->value();
   //std::cout << "numberOfDimensionsToProjectTo: " << numberOfDimensionsToProjectTo << std::endl;
@@ -163,7 +163,7 @@ void InteractivePatchProjectionWidget::DisplayPatches()
 
   unprojectedVector += this->MeanVector; // Add the mean
 
-  EigenHelpers::OutputHorizontal("unprojectedVector", unprojectedVector);
+  //EigenHelpers::OutputHorizontal("unprojectedVector", unprojectedVector);
 
   ImageType::Pointer projectedPatchImage = ImageType::New();
   PatchProjection::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(), this->Image->GetNumberOfComponentsPerPixel());
