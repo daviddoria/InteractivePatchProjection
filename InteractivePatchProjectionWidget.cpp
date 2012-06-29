@@ -132,17 +132,8 @@ void InteractivePatchProjectionWidget::SharedConstructor()
                              SLOT(slot_clicked(vtkObject*, unsigned long, void*, void*)));
 }
 
-void InteractivePatchProjectionWidget::DisplayPatches()
+void InteractivePatchProjectionWidget::ComputeProjectedPatch()
 {
-  // Display the original patch
-  QImage originalPatchQImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), this->SelectedRegion);
-
-  QGraphicsPixmapItem* originalPatchItem =
-        this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchQImage));
-  this->gfxOriginalPatch->setScene(this->OriginalPatchScene);
-
-  this->gfxOriginalPatch->fitInView(originalPatchItem);
-
   // Compute the projected patch
   Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(),
                                                                this->SelectedRegion);
@@ -177,10 +168,24 @@ void InteractivePatchProjectionWidget::DisplayPatches()
   QImage projectedPatchQImage = ITKQtHelpers::GetQImageColor(projectedPatchImage.GetPointer(),
                                                              projectedPatchImage->GetLargestPossibleRegion());
 
-  QGraphicsPixmapItem* projectedPatchItem =
-           this->ProjectedPatchScene->addPixmap(QPixmap::fromImage(projectedPatchQImage));
-  this->gfxProjectedPatch->setScene(this->ProjectedPatchScene);
+}
 
+void InteractivePatchProjectionWidget::DisplayPatches()
+{
+  // This function assumse that this->SelectedRegion is set properly
+
+  // Display the original patch
+  this->OriginalPatchQImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), this->SelectedRegion);
+
+  QGraphicsPixmapItem* originalPatchItem =
+        this->OriginalPatchScene->addPixmap(QPixmap::fromImage(this->OriginalPatchQImage));
+  this->gfxOriginalPatch->setScene(this->OriginalPatchScene);
+  this->gfxOriginalPatch->fitInView(originalPatchItem);
+
+  // Display the projected patch
+  QGraphicsPixmapItem* projectedPatchItem =
+           this->ProjectedPatchScene->addPixmap(QPixmap::fromImage(this->ProjectedPatchQImage));
+  this->gfxProjectedPatch->setScene(this->ProjectedPatchScene);
   this->gfxProjectedPatch->fitInView(projectedPatchItem);
 }
 
@@ -237,6 +242,7 @@ void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned 
     return;
   }
 
+  ComputeProjectedPatch();
   DisplayPatches();
 }
 
@@ -248,6 +254,11 @@ InteractivePatchProjectionWidget::InteractivePatchProjectionWidget(QWidget* pare
 void InteractivePatchProjectionWidget::on_actionQuit_activated()
 {
   exit(0);
+}
+
+void InteractivePatchProjectionWidget::resizeEvent(QResizeEvent* event)
+{
+  DisplayPatches();
 }
 
 void InteractivePatchProjectionWidget::showEvent(QShowEvent* event)

@@ -87,11 +87,17 @@ private:
   /** Display the patches. */
   void DisplayPatches();
 
+  /** Compute projected patch. */
+  void ComputeProjectedPatch();
+
   /** Get the radius of the patches being used. */
   unsigned int GetPatchRadius();
 
   /** This function is called when the widget is displayed on the screen. */
   void showEvent(QShowEvent* event);
+
+  /** This function is called when the widget is resized. */
+  void resizeEvent ( QResizeEvent * event );
 
   /** Open an image. */
   void OpenImage(const std::string& filename);
@@ -134,6 +140,12 @@ private:
 
   /** The region that has been selected */
   itk::ImageRegion<2> SelectedRegion;
+
+  /** The original patch. */
+  QImage OriginalPatchQImage;
+
+  /** The projected patch. */
+  QImage ProjectedPatchQImage;
 };
 
 #endif // InteractivePatchProjectionWidget_H
