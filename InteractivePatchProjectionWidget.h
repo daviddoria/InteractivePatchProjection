@@ -51,8 +51,12 @@ class InteractivePatchProjectionWidget : public QMainWindow, private Ui::Interac
 {
 Q_OBJECT
 public:
-
+  // Typedefs
   typedef itk::VectorImage<float, 2> ImageType;
+//   typedef Eigen::VectorXf VectorType;
+//   typedef Eigen::MatrixXf MatrixType;
+  typedef Eigen::VectorXd VectorType;
+  typedef Eigen::MatrixXd MatrixType;
 
   // Constructor/Destructor
   InteractivePatchProjectionWidget(QWidget* parent = 0);
@@ -124,10 +128,10 @@ private:
   itk::Size<2> PatchSize;
 
   /** The projection matrix to project patches to a lower dimensional space */
-  Eigen::MatrixXf ProjectionMatrix;
+  MatrixType ProjectionMatrix;
 
   /** The mean of each component of the vectorized image patches */
-  Eigen::VectorXf MeanVector;
+  VectorType MeanVector;
 
   /** An object to allow us to connect Qt events to VTK callbacks */
   vtkSmartPointer<vtkEventQtSlotConnect> Connections;

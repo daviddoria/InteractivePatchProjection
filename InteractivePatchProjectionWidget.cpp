@@ -117,7 +117,7 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 void InteractivePatchProjectionWidget::ComputeProjectedPatch()
 {
   // Compute the projected patch
-  Eigen::VectorXf vectorized = PatchProjection<Eigen::MatrixXf, Eigen::VectorXf>::VectorizePatch(this->Image.GetPointer(),
+  VectorType vectorized = PatchProjection<MatrixType, VectorType>::VectorizePatch(this->Image.GetPointer(),
                                                                this->SelectedRegion);
   vectorized -= this->MeanVector; // Subtract the mean
 
@@ -126,15 +126,15 @@ void InteractivePatchProjectionWidget::ComputeProjectedPatch()
   unsigned int numberOfDimensionsToProjectTo = this->sldDimensions->value();
   //std::cout << "numberOfDimensionsToProjectTo: " << numberOfDimensionsToProjectTo << std::endl;
 
-  Eigen::MatrixXf truncatedProjectionMatrix =
+  MatrixType truncatedProjectionMatrix =
          EigenHelpers::TruncateColumns(this->ProjectionMatrix, numberOfDimensionsToProjectTo);
   // This is a change of basis, hence the transpose
-  Eigen::VectorXf projectedVector = truncatedProjectionMatrix.transpose() * vectorized;
+  VectorType projectedVector = truncatedProjectionMatrix.transpose() * vectorized;
 
 //  EigenHelpers::OutputHorizontal("projectedVector", projectedVector);
 
   // This is "undoing" the transformation
-  Eigen::VectorXf unprojectedVector = truncatedProjectionMatrix * projectedVector;
+  VectorType unprojectedVector = truncatedProjectionMatrix * projectedVector;
 
   // Apply the inverse normalization transform
 
@@ -143,12 +143,12 @@ void InteractivePatchProjectionWidget::ComputeProjectedPatch()
   //EigenHelpers::OutputHorizontal("unprojectedVector", unprojectedVector);
 
   ImageType::Pointer projectedPatchImage = ImageType::New();
-  PatchProjection<Eigen::MatrixXf, Eigen::VectorXf>::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(),
+  PatchProjection<MatrixType, VectorType>::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(),
                                     this->Image->GetNumberOfComponentsPerPixel());
 
   // Display the projected patch
-  QImage projectedPatchQImage = ITKQtHelpers::GetQImageColor(projectedPatchImage.GetPointer(),
-                                                             projectedPatchImage->GetLargestPossibleRegion());
+  this->ProjectedPatchQImage = ITKQtHelpers::GetQImageColor(projectedPatchImage.GetPointer(),
+                                                            projectedPatchImage->GetLargestPossibleRegion());
 
 }
 
@@ -179,6 +179,7 @@ void InteractivePatchProjectionWidget::on_sldDimensions_sliderReleased()
     return;
   }
 
+  ComputeProjectedPatch();
   DisplayPatches();
 }
 
@@ -197,6 +198,7 @@ void InteractivePatchProjectionWidget::on_sldDimensions_valueChanged(int value)
     return;
   }
 
+  ComputeProjectedPatch();
   DisplayPatches();
 }
 
@@ -277,9 +279,10 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
   // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
   // Known to work with radius=7, known to not work with radius=15
-  this->ProjectionMatrix = PatchProjection<Eigen::MatrixXf, Eigen::VectorXf>::ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(),
-                                                                                    GetPatchRadius(),
-                                                                                    this->MeanVector);
+  this->ProjectionMatrix = PatchProjection<MatrixType, VectorType>::
+                              ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(),
+                                                                      GetPatchRadius(),
+                                                                      this->MeanVector);
 
   //std::cout << "Mean: " << this->MeanVector << std::endl;
 
