@@ -135,7 +135,7 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 void InteractivePatchProjectionWidget::ComputeProjectedPatch()
 {
   // Compute the projected patch
-  Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(),
+  Eigen::VectorXf vectorized = PatchProjection<Eigen::MatrixXf, Eigen::VectorXf>::VectorizePatch(this->Image.GetPointer(),
                                                                this->SelectedRegion);
   vectorized -= this->MeanVector; // Subtract the mean
 
@@ -161,7 +161,7 @@ void InteractivePatchProjectionWidget::ComputeProjectedPatch()
   //EigenHelpers::OutputHorizontal("unprojectedVector", unprojectedVector);
 
   ImageType::Pointer projectedPatchImage = ImageType::New();
-  PatchProjection::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(),
+  PatchProjection<Eigen::MatrixXf, Eigen::VectorXf>::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(),
                                     this->Image->GetNumberOfComponentsPerPixel());
 
   // Display the projected patch
@@ -295,7 +295,7 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
   // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
   // Known to work with radius=7, known to not work with radius=15
-  this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(),
+  this->ProjectionMatrix = PatchProjection<Eigen::MatrixXf, Eigen::VectorXf>::ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(),
                                                                                     GetPatchRadius(),
                                                                                     this->MeanVector);
 
