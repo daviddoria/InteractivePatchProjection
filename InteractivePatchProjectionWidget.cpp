@@ -35,29 +35,11 @@
 #include <QTextEdit>
 
 // VTK
-#include <vtkActor.h>
-#include <vtkCamera.h>
 #include <vtkEventQtSlotConnect.h>
-#include <vtkFloatArray.h>
-#include <vtkImageData.h>
-#include <vtkImageProperty.h>
 #include <vtkImageSlice.h>
-#include <vtkImageSliceMapper.h>
-#include <vtkLookupTable.h>
-#include <vtkMath.h>
-#include <vtkPointData.h>
-#include <vtkProperty2D.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkPoints.h>
-#include <vtkPolyData.h>
-#include <vtkPolyDataMapper.h>
-#include <vtkProperty.h>
 #include <vtkRenderer.h>
 #include <vtkRenderWindow.h>
-#include <vtkRenderWindowInteractor.h>
 #include <vtkSmartPointer.h>
-#include <vtkWindowToImageFilter.h>
-#include <vtkXMLPolyDataReader.h>
 
 // Submodules
 #include "ITKVTKHelpers/ITKVTKHelpers.h"
