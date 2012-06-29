@@ -137,13 +137,15 @@ void InteractivePatchProjectionWidget::DisplayPatches()
   // Display the original patch
   QImage originalPatchQImage = ITKQtHelpers::GetQImageColor(this->Image.GetPointer(), this->SelectedRegion);
 
-  QGraphicsPixmapItem* originalPatchItem = this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchQImage));
+  QGraphicsPixmapItem* originalPatchItem =
+        this->OriginalPatchScene->addPixmap(QPixmap::fromImage(originalPatchQImage));
   this->gfxOriginalPatch->setScene(this->OriginalPatchScene);
 
   this->gfxOriginalPatch->fitInView(originalPatchItem);
 
   // Compute the projected patch
-  Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(), this->SelectedRegion);
+  Eigen::VectorXf vectorized = PatchProjection::VectorizePatch(this->Image.GetPointer(),
+                                                               this->SelectedRegion);
   vectorized -= this->MeanVector; // Subtract the mean
 
   //EigenHelpers::OutputHorizontal("vectorized", vectorized);
@@ -151,8 +153,10 @@ void InteractivePatchProjectionWidget::DisplayPatches()
   unsigned int numberOfDimensionsToProjectTo = this->sldDimensions->value();
   //std::cout << "numberOfDimensionsToProjectTo: " << numberOfDimensionsToProjectTo << std::endl;
 
-  Eigen::MatrixXf truncatedProjectionMatrix = EigenHelpers::TruncateColumns(this->ProjectionMatrix, numberOfDimensionsToProjectTo);
-  Eigen::VectorXf projectedVector = truncatedProjectionMatrix.transpose() * vectorized; // This is a change of basis, hence the transpose
+  Eigen::MatrixXf truncatedProjectionMatrix =
+         EigenHelpers::TruncateColumns(this->ProjectionMatrix, numberOfDimensionsToProjectTo);
+  // This is a change of basis, hence the transpose
+  Eigen::VectorXf projectedVector = truncatedProjectionMatrix.transpose() * vectorized;
 
 //  EigenHelpers::OutputHorizontal("projectedVector", projectedVector);
 
@@ -166,12 +170,15 @@ void InteractivePatchProjectionWidget::DisplayPatches()
   //EigenHelpers::OutputHorizontal("unprojectedVector", unprojectedVector);
 
   ImageType::Pointer projectedPatchImage = ImageType::New();
-  PatchProjection::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(), this->Image->GetNumberOfComponentsPerPixel());
+  PatchProjection::UnvectorizePatch(unprojectedVector, projectedPatchImage.GetPointer(),
+                                    this->Image->GetNumberOfComponentsPerPixel());
 
   // Display the projected patch
-  QImage projectedPatchQImage = ITKQtHelpers::GetQImageColor(projectedPatchImage.GetPointer(), projectedPatchImage->GetLargestPossibleRegion());
+  QImage projectedPatchQImage = ITKQtHelpers::GetQImageColor(projectedPatchImage.GetPointer(),
+                                                             projectedPatchImage->GetLargestPossibleRegion());
 
-  QGraphicsPixmapItem* projectedPatchItem = this->ProjectedPatchScene->addPixmap(QPixmap::fromImage(projectedPatchQImage));
+  QGraphicsPixmapItem* projectedPatchItem =
+           this->ProjectedPatchScene->addPixmap(QPixmap::fromImage(projectedPatchQImage));
   this->gfxProjectedPatch->setScene(this->ProjectedPatchScene);
 
   this->gfxProjectedPatch->fitInView(projectedPatchItem);
@@ -206,9 +213,11 @@ void InteractivePatchProjectionWidget::on_sldDimensions_valueChanged(int value)
   DisplayPatches();
 }
 
-void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned long eventId, void* client_data, void* call_data)
+void InteractivePatchProjectionWidget::slot_clicked(vtkObject* caller, unsigned long eventId,
+                                                    void* client_data, void* call_data)
 {
-  // We expect this slot to be called with 'call_data' containing the location of the picked point in image coordinates.
+  // We expect this slot to be called with 'call_data' containing the location of the picked
+  // point in image coordinates.
 
   // Get the picked region
   double* point = reinterpret_cast<double*>(call_data);
@@ -256,12 +265,12 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   QFileInfo fileInfo(fileName.c_str());
   std::string workingDirectory = fileInfo.absoluteDir().absolutePath().toStdString() + "/";
 
-  //std::cout << "Working directory set to: " << workingDirectory << std::endl;
+  std::cout << "Working directory set to: " << workingDirectory << std::endl;
   QDir::setCurrent(QString(workingDirectory.c_str()));
 
   typedef itk::ImageFileReader<ImageType> ReaderType;
   ReaderType::Pointer reader = ReaderType::New();
-  reader->SetFileName(fileName);
+  reader->SetFileName(fileInfo.fileName().toStdString());
   reader->Update();
 
   ITKHelpers::DeepCopy(reader->GetOutput(), this->Image.GetPointer());
@@ -275,12 +284,14 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
   // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
   // Known to work with radius=7, known to not work with radius=15
-  this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(), GetPatchRadius(),
-                                                                    this->MeanVector);
+  this->ProjectionMatrix = PatchProjection::ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(),
+                                                                                    GetPatchRadius(),
+                                                                                    this->MeanVector);
 
   //std::cout << "Mean: " << this->MeanVector << std::endl;
 
-  std::cout << "Projection matrix is " << this->ProjectionMatrix.rows() << " x " << this->ProjectionMatrix.cols() << std::endl;
+  std::cout << "Projection matrix is " << this->ProjectionMatrix.rows()
+            << " x " << this->ProjectionMatrix.cols() << std::endl;
 
   this->sldDimensions->setMinimum(1);
   this->sldDimensions->setMaximum(this->ProjectionMatrix.rows());
@@ -289,7 +300,10 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
 void InteractivePatchProjectionWidget::on_actionOpenImage_activated()
 {
   // Get a filename to open
-  QString fileName = QFileDialog::getOpenFileName(this, "Open File", ".", "Image Files (*.jpg *.jpeg *.bmp *.png *.mha);;PNG Files (*.png)");
+  QString fileName =
+           QFileDialog::getOpenFileName(this,
+                                        "Open File", ".",
+                                        "Image Files (*.jpg *.jpeg *.bmp *.png *.mha);;PNG Files (*.png)");
 
   //std::cout << "Got filename: " << fileName.toStdString() << std::endl;
   if(fileName.toStdString().empty())
