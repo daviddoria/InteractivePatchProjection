@@ -51,6 +51,7 @@
 
 // Custom
 #include "TableModelEigenBasis.h"
+#include "PixmapDelegate.h"
 
 void InteractivePatchProjectionWidget::on_actionHelp_activated()
 {
@@ -78,24 +79,24 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 
   this->EigenBasisModel = new TableModelEigenBasis(this->ProjectionMatrix, this);
   this->tableViewEigenBasis->setModel(this->EigenBasisModel);
-  
+
+  this->EigenPixmapDelegate = new PixmapDelegate;
+  this->tableViewEigenBasis->setItemDelegate(this->EigenPixmapDelegate);
+
   this->OriginalPatchScene = new QGraphicsScene;
   this->ProjectedPatchScene = new QGraphicsScene;
 
   // Setup icons
   QIcon openIcon = QIcon::fromTheme("document-open");
-  QIcon saveIcon = QIcon::fromTheme("document-save");
 
   // Setup toolbar
   actionOpenImage->setIcon(openIcon);
   this->toolBar->addAction(actionOpenImage);
 
-  actionOpenMask->setIcon(openIcon);
-  this->toolBar->addAction(actionOpenMask);
-  actionOpenMask->setEnabled(false);
-
   // Setup the image display objects
-  this->ImageLayer.ImageSlice->VisibilityOff(); // There are errors if this is visible and therefore displayed before it has data ("This data object does not contain the requested extent.")
+  // There are errors if this is visible and therefore displayed before it has data
+  // ("This data object does not contain the requested extent.")
+  this->ImageLayer.ImageSlice->VisibilityOff(); 
 
   // Add objects to the renderer
   this->Renderer = vtkSmartPointer<vtkRenderer>::New();
@@ -289,6 +290,9 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
                               ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(),
                                                                       GetPatchRadius(),
                                                                       this->MeanVector);
+
+  this->EigenBasisModel->SetEigenvectorMatrix(this->ProjectionMatrix);
+  // this->EigenBasisModel->Refresh(); // This is done internally
 
   //std::cout << "Mean: " << this->MeanVector << std::endl;
 

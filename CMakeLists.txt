@@ -40,22 +40,22 @@ INCLUDE(${ITK_USE_FILE})
 QT4_WRAP_UI(InteractivePatchProjectionWidgetUISrcs
 InteractivePatchProjectionWidget.ui)
 QT4_WRAP_CPP(InteractivePatchProjectionWidgetMOCSrcs
-InteractivePatchProjectionWidget.h)
+InteractivePatchProjectionWidget.h
+PixmapDelegate.h)
 
 ADD_EXECUTABLE(InteractivePatchProjection
 InteractivePatchProjectionWidget.cpp
 Interactive.cpp
 TableModelEigenBasis.cpp
+PixmapDelegate.cpp
 ${InteractivePatchProjectionWidgetUISrcs} ${InteractivePatchProjectionWidgetMOCSrcs})
 
 TARGET_LINK_LIBRARIES(InteractivePatchProjection
 EigenHelpers
-#QtHelpers VTKHelpers
 Helpers
 ITKHelpers
 ITKVTKHelpers
 ITKVTKCamera
-#PatchClustering
 Layer
 libCustomWidgets
 PointSelectionStyle

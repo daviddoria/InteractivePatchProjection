@@ -35,6 +35,7 @@ class vtkImageSliceMapper;
 // Custom
 class PointSelectionStyle2D;
 class TableModelEigenBasis;
+class PixmapDelegate;
 
 // ITK
 #include "itkImage.h"
@@ -153,6 +154,8 @@ private:
   QImage ProjectedPatchQImage;
 
   TableModelEigenBasis* EigenBasisModel;
+
+  PixmapDelegate* EigenPixmapDelegate;
 };
 
 #endif // InteractivePatchProjectionWidget_H

@@ -51,28 +51,35 @@ int TableModelEigenBasis::rowCount(const QModelIndex& parent) const
 
 int TableModelEigenBasis::columnCount(const QModelIndex& parent) const
 {
+  //std::cout << "There are " << this->EigenvectorMatrix.cols() << " cols" << std::endl;
   return this->EigenvectorMatrix.cols();
 }
 
 QVariant TableModelEigenBasis::data(const QModelIndex& index, int role) const
 {
-  QVariant returnValue;
-  if(role == Qt::DisplayRole && index.row() >= 0)
+  //std::cout << "data() requested for " << index.row() << " " << index.column() << std::endl;
+
+  if(role == Qt::DisplayRole && index.row() >= 0 && index.column() >= 0)
     {
     switch(index.row())
       {
       case 0:
         {
         return index.column();
-        break;
         }
       case 1:
         {
+        //std::cout << "Create basis image " << index.column() << "." << std::endl;
         //typedef itk::Image<itk::CovariantVector<unsigned char, 3>, 2> ImageType;
         typedef itk::VectorImage<float, 2> ImageType;
         ImageType::Pointer image = ImageType::New();
+
+        Eigen::VectorXd eigenColumn = this->EigenvectorMatrix.col(index.column());
+        Eigen::VectorXd scaled = EigenHelpers::ScaleVector(eigenColumn,
+                                                           0.0f, 255.0f);
+
         PatchProjection<Eigen::MatrixXd, Eigen::VectorXd>::UnvectorizePatch
-          (EigenvectorMatrix.col(index.column()), image.GetPointer(), 3);
+          (scaled, image.GetPointer(), 3);
 
         QImage patchImage = ITKQtHelpers::GetQImageColor(image.GetPointer(),
                                                          image->GetLargestPossibleRegion());
@@ -80,41 +87,17 @@ QVariant TableModelEigenBasis::data(const QModelIndex& index, int role) const
         patchImage = patchImage.scaledToHeight(this->PatchDisplaySize);
 
         return QPixmap::fromImage(patchImage);
-
-        break;
         }
       } // end switch
 
     } // end if DisplayRole
 
-  return returnValue;
+  return QVariant();
 }
 
 QVariant TableModelEigenBasis::headerData(int section, Qt::Orientation orientation, int role) const
 {
   QVariant returnValue;
-  if(role == Qt::DisplayRole)
-    {
-    if(orientation == Qt::Horizontal)
-      {
-      switch(section)
-        {
-        case 0:
-          returnValue = "Patch";
-          break;
-        case 1:
-          returnValue = "Score";
-          break;
-//         case 2:
-//           returnValue = "Location";
-//           break;
-        case 2:
-          returnValue = "Cluster";
-          break;
-        } // end switch
-      }// end Horizontal orientation
-    } // end DisplayRole
-
   return returnValue;
 }
 
@@ -126,6 +109,14 @@ void TableModelEigenBasis::Refresh()
 
 void TableModelEigenBasis::SetEigenvectorMatrix(const Eigen::MatrixXd& eigenvectorMatrix)
 {
+//   beginInsertRows();
+//   beginInsertColumns();
+  
   this->EigenvectorMatrix = eigenvectorMatrix;
+
+//   endInsertRows();
+//   endInsertColumns();
+  
   Refresh();
+  
 }
