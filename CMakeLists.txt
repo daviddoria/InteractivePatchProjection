@@ -45,6 +45,7 @@ InteractivePatchProjectionWidget.h)
 ADD_EXECUTABLE(InteractivePatchProjection
 InteractivePatchProjectionWidget.cpp
 Interactive.cpp
+TableModelEigenBasis.cpp
 ${InteractivePatchProjectionWidgetUISrcs} ${InteractivePatchProjectionWidgetMOCSrcs})
 
 TARGET_LINK_LIBRARIES(InteractivePatchProjection

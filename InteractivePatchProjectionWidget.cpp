@@ -49,6 +49,9 @@
 #include "vtkPointSelectionStyle/PointSelectionStyle2D.h"
 #include "ITKQtHelpers/ITKQtHelpers.h"
 
+// Custom
+#include "TableModelEigenBasis.h"
+
 void InteractivePatchProjectionWidget::on_actionHelp_activated()
 {
   QTextEdit* help=new QTextEdit();
@@ -73,6 +76,9 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 {
   this->setupUi(this);
 
+  this->EigenBasisModel = new TableModelEigenBasis(this->ProjectionMatrix, this);
+  this->tableViewEigenBasis->setModel(this->EigenBasisModel);
+  
   this->OriginalPatchScene = new QGraphicsScene;
   this->ProjectedPatchScene = new QGraphicsScene;
 
