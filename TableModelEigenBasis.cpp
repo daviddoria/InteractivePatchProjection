@@ -39,7 +39,6 @@ void TableModelEigenBasis::SetPatchDisplaySize(const unsigned int value)
 
 Qt::ItemFlags TableModelEigenBasis::flags(const QModelIndex& index) const
 {
-  //Qt::ItemFlags itemFlags = (!Qt::ItemIsEditable) | Qt::ItemIsSelectable | Qt::ItemIsEnabled | (!Qt::ItemIsUserCheckable) | (!Qt::ItemIsTristate);
   Qt::ItemFlags itemFlags = Qt::ItemIsSelectable | Qt::ItemIsEnabled;
   return itemFlags;
 }
@@ -51,7 +50,6 @@ int TableModelEigenBasis::rowCount(const QModelIndex& parent) const
 
 int TableModelEigenBasis::columnCount(const QModelIndex& parent) const
 {
-  //std::cout << "There are " << this->EigenvectorMatrix.cols() << " cols" << std::endl;
   return this->EigenvectorMatrix.cols();
 }
 
@@ -59,7 +57,17 @@ QVariant TableModelEigenBasis::data(const QModelIndex& index, int role) const
 {
   //std::cout << "data() requested for " << index.row() << " " << index.column() << std::endl;
 
-  if(role == Qt::DisplayRole && index.row() >= 0 && index.column() >= 0)
+  // With the table resize mode set to QHeaderView::ResizeToContents, this function is called
+  // before the model is populated, and will crash because there is no data. To prevent this, just
+  // return if the data has not been set.
+  if(this->Eigenvalues.size() == 0)
+  {
+    return QVariant();
+  }
+
+  if(role == Qt::DisplayRole &&
+    index.row() >= 0 && index.column() >= 0 &&
+    index.row() < 2 && index.column() < this->EigenvectorMatrix.cols())
     {
     switch(index.row())
       {
@@ -75,8 +83,15 @@ QVariant TableModelEigenBasis::data(const QModelIndex& index, int role) const
         ImageType::Pointer image = ImageType::New();
 
         Eigen::VectorXd eigenColumn = this->EigenvectorMatrix.col(index.column());
-        Eigen::VectorXd scaled = EigenHelpers::ScaleVector(eigenColumn,
-                                                           0.0f, 255.0f);
+
+        // Arbitrary scale
+//         Eigen::VectorXd scaled = EigenHelpers::ScaleVector(eigenColumn,
+//                                                            0.0f, 255.0f);
+
+        // Scale by eigenvalue
+        Eigen::VectorXd scaled = sqrt(this->Eigenvalues[index.column()]) * eigenColumn;
+        //std::cout << "e-val: " << this->Eigenvalues[index.column()] << " ";
+        scaled += this->MeanVector;
 
         PatchProjection<Eigen::MatrixXd, Eigen::VectorXd>::UnvectorizePatch
           (scaled, image.GetPointer(), 3);
@@ -84,14 +99,16 @@ QVariant TableModelEigenBasis::data(const QModelIndex& index, int role) const
         QImage patchImage = ITKQtHelpers::GetQImageColor(image.GetPointer(),
                                                          image->GetLargestPossibleRegion());
 
+        //std::cout << "PatchDisplaySize: " << PatchDisplaySize << std::endl;
         patchImage = patchImage.scaledToHeight(this->PatchDisplaySize);
 
+        //std::cout << "returning pixmap..." << std::endl;
         return QPixmap::fromImage(patchImage);
         }
       } // end switch
 
     } // end if DisplayRole
-
+  //std::cout << "end data()" << std::endl;
   return QVariant();
 }
 
@@ -109,14 +126,18 @@ void TableModelEigenBasis::Refresh()
 
 void TableModelEigenBasis::SetEigenvectorMatrix(const Eigen::MatrixXd& eigenvectorMatrix)
 {
-//   beginInsertRows();
-//   beginInsertColumns();
-  
   this->EigenvectorMatrix = eigenvectorMatrix;
-
-//   endInsertRows();
-//   endInsertColumns();
-  
   Refresh();
-  
+}
+
+void TableModelEigenBasis::SetEigenvalues(const std::vector<double>& eigenvalues)
+{
+  this->Eigenvalues = eigenvalues;
+  Refresh();
+}
+
+void TableModelEigenBasis::SetMeanVector(const Eigen::VectorXd& meanVector)
+{
+  this->MeanVector = meanVector;
+  Refresh();
 }

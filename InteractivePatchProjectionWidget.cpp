@@ -114,6 +114,10 @@ void InteractivePatchProjectionWidget::SharedConstructor()
 
   this->Image = ImageType::New();
 
+  // Resize the table rows/cols to fit the patches
+  this->tableViewEigenBasis->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  this->tableViewEigenBasis->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
   this->Connections = vtkSmartPointer<vtkEventQtSlotConnect>::New();
   this->Connections->Connect(this->InteractorStyle,
                              this->InteractorStyle->ClickedPointEvent,
@@ -286,12 +290,24 @@ void InteractivePatchProjectionWidget::OpenImage(const std::string& fileName)
   std::cout << "Computing projection matrix with radius = " << GetPatchRadius() << std::endl;
   // NOTE: this will crash if the patch size is too big (too big for RAM in a machine with 4GB).
   // Known to work with radius=7, known to not work with radius=15
+  std::vector<double> sortedEigenvalues;
   this->ProjectionMatrix = PatchProjection<MatrixType, VectorType>::
                               ComputeProjectionMatrix_CovarianceEigen(this->Image.GetPointer(),
                                                                       GetPatchRadius(),
-                                                                      this->MeanVector);
+                                                                      this->MeanVector,
+                                                                      sortedEigenvalues);
+
+  // Use this for debugging
+//   this->ProjectionMatrix = PatchProjection<MatrixType, VectorType>::
+//                             GetDummyProjectionMatrix(this->Image.GetPointer(),
+//                                                       GetPatchRadius(),
+//                                                       this->MeanVector,
+//                                                       sortedEigenvalues);
 
   this->EigenBasisModel->SetEigenvectorMatrix(this->ProjectionMatrix);
+  this->EigenBasisModel->SetEigenvalues(sortedEigenvalues);
+  this->EigenBasisModel->SetMeanVector(this->MeanVector);
+  this->EigenBasisModel->SetPatchDisplaySize(100);
   // this->EigenBasisModel->Refresh(); // This is done internally
 
   //std::cout << "Mean: " << this->MeanVector << std::endl;

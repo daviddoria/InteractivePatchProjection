@@ -21,6 +21,12 @@
 
 #include <QStyledItemDelegate>
 
+/** This class renders an image as the contents of a cell in a table.
+  *
+  * You should usually use the following to resize the table rows/cols to fit the patches:
+  * this->tableViewEigenBasis->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  * this->tableViewEigenBasis->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+  */
 class PixmapDelegate : public QStyledItemDelegate
 {
 Q_OBJECT
@@ -37,7 +43,8 @@ public:
   QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index ) const ;
 
 private:
-  unsigned int Padding; // This padding will be placed around the entire image in the cell
+  /** This padding will be placed around the entire image in the cell. */
+  unsigned int Padding; 
 };
 
 #endif

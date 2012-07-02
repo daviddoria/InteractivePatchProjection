@@ -54,12 +54,20 @@ public:
 
   void SetEigenvectorMatrix(const Eigen::MatrixXd& eigenvectorMatrix);
 
+  void SetEigenvalues(const std::vector<double>& eigenvalues);
+
+  void SetMeanVector(const Eigen::VectorXd& meanVector);
+
 private:
 
   /** This is how big to draw the patches in the table. */
-  unsigned int PatchDisplaySize; // TODO: This should be set by the size of the target patch, or a multiplier, or something
+  unsigned int PatchDisplaySize;
 
   Eigen::MatrixXd EigenvectorMatrix;
+
+  std::vector<double> Eigenvalues;
+
+  Eigen::VectorXd MeanVector;
 };
 
 #endif

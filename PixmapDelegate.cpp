@@ -44,8 +44,6 @@ void PixmapDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option
   unsigned int originalWidth = rect.width();
   unsigned int originalHeight = rect.height();
 
-  //std::cout << "width: " << originalWidth << " height: " << originalHeight << std::endl;
-
   // We have to double the padding because we want it taken off from both sides.
   int minSize = std::min(rect.width(), rect.height()) - Padding*2; 
   //std::cout << "minSize: " << minSize << std::endl;
